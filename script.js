@@ -20,6 +20,7 @@
   let activeTimers = [];
   let rafId = null;
   let timerModalContext = null;
+  let lastActiveTimerUpdate = 0;
 
   const $ = (id) => document.getElementById(id);
   const authPanel = $("authPanel");
@@ -373,6 +374,62 @@
     renderCalendar();
   }
 
+  function removeTimersByTask(taskId, subId = null) {
+    let changed = false;
+    activeTimers = activeTimers.filter((t) => {
+      const isTarget = t.taskId === taskId && (!subId || t.subTaskId === subId);
+      if (isTarget) changed = true;
+      return !isTarget;
+    });
+    if (timerModalContext?.timerId && !activeTimers.find((t) => t.id === timerModalContext.timerId)) {
+      closeTimerModal();
+    }
+    if (!activeTimers.some((t) => t.status === TIMER_STATUS.RUNNING)) stopTicker();
+    if (changed) renderActiveTimers();
+  }
+
+  async function deleteSubTask(taskId, subId) {
+    const task = tasks.find((t) => t.id === taskId);
+    if (!task) return;
+    const confirmDel = confirm("보조작업을 삭제하시겠습니까?");
+    if (!confirmDel) return;
+    task.subTasks = task.subTasks.filter((s) => s.id !== subId);
+    await saveTask(task);
+    removeTimersByTask(taskId, subId);
+    renderTasks();
+    renderCalendar();
+  }
+
+  async function editTask(taskId) {
+    const task = tasks.find((t) => t.id === taskId);
+    if (!task) return;
+    const title = prompt("새 주작업 제목을 입력하세요", task.title);
+    if (title === null) return;
+    const due = prompt("마감일을 YYYY-MM-DD로 입력 (비우면 없음)", task.dueDate || "");
+    if (due === null) return;
+    const trimmedTitle = (title || "").trim();
+    const trimmedDue = (due || "").trim();
+    if (trimmedTitle) task.title = trimmedTitle;
+    task.dueDate = trimmedDue || null;
+    await saveTask(task);
+    renderTasks();
+    renderCalendar();
+    showToast("주작업이 수정되었습니다");
+  }
+
+  async function deleteTask(taskId) {
+    const task = tasks.find((t) => t.id === taskId);
+    if (!task) return;
+    const confirmDel = confirm("이 주작업과 모든 보조작업을 삭제하시겠습니까?");
+    if (!confirmDel) return;
+    tasks = tasks.filter((t) => t.id !== taskId);
+    await del("tasks", taskId);
+    removeTimersByTask(taskId);
+    renderTasks();
+    renderCalendar();
+    showToast("주작업이 삭제되었습니다");
+  }
+
   async function updateSubTaskMeta(taskId, subId) {
     const task = tasks.find((t) => t.id === taskId);
     if (!task) return;
@@ -415,6 +472,8 @@
       titleWrap.appendChild(meta);
       head.appendChild(titleWrap);
 
+      const headRight = document.createElement("div");
+      headRight.className = "task-head__right";
       const progressWrap = document.createElement("div");
       progressWrap.className = "task-progress";
       const bar = document.createElement("div");
@@ -427,7 +486,21 @@
       label.textContent = `${Math.round(task.progress || 0)}%`;
       progressWrap.appendChild(bar);
       progressWrap.appendChild(label);
-      head.appendChild(progressWrap);
+
+      const editBtn = document.createElement("button");
+      editBtn.className = "ghost";
+      editBtn.textContent = "수정";
+      editBtn.addEventListener("click", () => editTask(task.id));
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "danger";
+      deleteBtn.textContent = "삭제";
+      deleteBtn.addEventListener("click", () => deleteTask(task.id));
+
+      headRight.appendChild(progressWrap);
+      headRight.appendChild(editBtn);
+      headRight.appendChild(deleteBtn);
+      head.appendChild(headRight);
       card.appendChild(head);
 
       const subList = document.createElement("div");
@@ -474,6 +547,12 @@
           editBtn.textContent = "비중/목표";
           editBtn.addEventListener("click", () => updateSubTaskMeta(task.id, sub.id));
           actions.appendChild(editBtn);
+
+          const delBtn = document.createElement("button");
+          delBtn.className = "danger";
+          delBtn.textContent = "삭제";
+          delBtn.addEventListener("click", () => deleteSubTask(task.id, sub.id));
+          actions.appendChild(delBtn);
 
           row.appendChild(info);
           row.appendChild(actions);
@@ -543,6 +622,7 @@
     activeTimers.forEach((timer) => {
       const card = document.createElement("div");
       card.className = "timer-card";
+      card.dataset.id = timer.id;
 
       const info = document.createElement("div");
       const title = document.createElement("div");
@@ -567,7 +647,7 @@
       actions.appendChild(openBtn);
 
       const pauseResume = document.createElement("button");
-      pauseResume.className = timer.status === TIMER_STATUS.RUNNING ? "secondary" : "primary";
+      pauseResume.className = `${timer.status === TIMER_STATUS.RUNNING ? "secondary" : "primary"} timer-pause-resume`;
       pauseResume.textContent = timer.status === TIMER_STATUS.RUNNING ? "일시정지" : "재개";
       pauseResume.addEventListener("click", () => {
         if (timer.status === TIMER_STATUS.RUNNING) pauseTimer(timer.id);
@@ -578,6 +658,27 @@
       card.appendChild(info);
       card.appendChild(actions);
       activeTimersEl.appendChild(card);
+    });
+  }
+
+  function updateActiveTimersRemaining() {
+    const now = performance.now();
+    if (now - lastActiveTimerUpdate < 200) return;
+    lastActiveTimerUpdate = now;
+    activeTimersEl.querySelectorAll(".timer-card").forEach((card) => {
+      const id = card.dataset.id;
+      const timer = activeTimers.find((t) => t.id === id);
+      if (!timer) {
+        card.remove();
+        return;
+      }
+      const remainEl = card.querySelector(".timer-remaining");
+      if (remainEl) remainEl.textContent = formatDuration(timer.durationMs - timer.elapsedMs);
+      const pauseResume = card.querySelector(".timer-pause-resume");
+      if (pauseResume) {
+        pauseResume.textContent = timer.status === TIMER_STATUS.RUNNING ? "일시정지" : "재개";
+        pauseResume.className = `${timer.status === TIMER_STATUS.RUNNING ? "secondary" : "primary"} timer-pause-resume`;
+      }
     });
   }
 
@@ -993,7 +1094,7 @@
       }
     });
     updateRunningView();
-    renderActiveTimers();
+    updateActiveTimersRemaining();
   }
 
   async function completeTimer(timerId) {

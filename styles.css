@@ -122,6 +122,7 @@ button:active { transform: translateY(1px); }
 button.primary { background: linear-gradient(90deg, var(--primary) 0%, var(--primary-strong) 100%); color: #0c1a25; font-weight: 700; }
 button.secondary { background: rgba(255, 255, 255, 0.05); }
 button.ghost { background: transparent; color: var(--muted); }
+button.danger { background: linear-gradient(90deg, var(--danger), #ff6b6b); color: #1b0b0b; font-weight: 700; }
 
 .select {
   padding: 10px 12px;
@@ -162,6 +163,7 @@ input, select {
 
 input::placeholder { color: rgba(255, 255, 255, 0.4); }
 [data-theme="light"] input::placeholder { color: rgba(0, 0, 0, 0.4); }
+[data-theme="pastel"] input::placeholder { color: rgba(45, 34, 56, 0.55); }
 input:focus-visible { outline: 2px solid var(--primary); }
 
 .task-add { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; }
@@ -174,7 +176,8 @@ input:focus-visible { outline: 2px solid var(--primary); }
   background: rgba(255, 255, 255, 0.03);
 }
 
-.task-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.task-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.task-head__right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 .task-progress { display: flex; align-items: center; gap: 8px; min-width: 140px; }
 .task-progress__bar { width: 120px; height: 8px; background: rgba(255, 255, 255, 0.08); border-radius: 999px; overflow: hidden; }
 .task-progress__fill { height: 100%; background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%); }
@@ -287,9 +290,10 @@ button.chip.active { background: rgba(93, 213, 196, 0.15); color: var(--primary)
 .timer-visual[data-analog-theme="a3"] .analog-hand--min { background: #ff8b8b; }
 .timer-visual[data-analog-theme="a3"] .analog-progress { border-color: rgba(255,139,139,0.4); }
 
-.timer-visual[data-digital-theme="d1"] .digital-display { background: linear-gradient(120deg, rgba(93,213,196,0.22), rgba(59,160,255,0.18)); color: #0b132b; }
-.timer-visual[data-digital-theme="d2"] .digital-display { background: linear-gradient(120deg, rgba(246,200,99,0.25), rgba(255,139,139,0.2)); color: #2d2238; }
-.timer-visual[data-digital-theme="d3"] .digital-display { background: linear-gradient(120deg, rgba(255,159,178,0.25), rgba(155,227,255,0.25)); color: #2d2238; }
+.timer-visual .digital-display { color: var(--text); }
+.timer-visual[data-digital-theme="d1"] .digital-display { background: linear-gradient(120deg, rgba(93,213,196,0.22), rgba(59,160,255,0.18)); }
+.timer-visual[data-digital-theme="d2"] .digital-display { background: linear-gradient(120deg, rgba(246,200,99,0.25), rgba(255,139,139,0.2)); }
+.timer-visual[data-digital-theme="d3"] .digital-display { background: linear-gradient(120deg, rgba(255,159,178,0.25), rgba(155,227,255,0.25)); }
 
 .tab-switch { display: flex; justify-content: flex-end; margin: -8px 0 12px; }
 .tab-switch .chip-row { gap: 8px; }
