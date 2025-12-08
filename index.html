@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Focus Fusion</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="app__header">
+        <div class="logo">Focus Fusion</div>
+        <div class="header__right">
+          <select id="themeSelect" class="select">
+            <option value="dark">다크</option>
+            <option value="light">라이트</option>
+            <option value="pastel">파스텔</option>
+          </select>
+          <div id="userInfo" class="user-info">로그인이 필요합니다</div>
+          <button id="adminButton" class="secondary hidden" type="button">관리자 페이지</button>
+          <button id="logoutButton" class="ghost hidden" type="button">로그아웃</button>
+        </div>
+      </header>
+
+      <section id="authPanel">
+        <div class="auth">
+          <div class="auth__card">
+            <p class="eyebrow">로그인</p>
+            <div class="field">
+              <label for="loginEmail">이메일</label>
+              <input id="loginEmail" type="email" placeholder="you@example.com" />
+            </div>
+            <div class="field">
+              <label for="loginPassword">비밀번호</label>
+              <input id="loginPassword" type="password" placeholder="••••" />
+            </div>
+            <button id="loginButton" class="primary" type="button">로그인</button>
+          </div>
+          <div class="auth__card">
+            <p class="eyebrow">회원가입</p>
+            <div class="field">
+              <label for="registerEmail">이메일</label>
+              <input id="registerEmail" type="email" placeholder="you@example.com" />
+            </div>
+            <div class="field">
+              <label for="registerPassword">비밀번호</label>
+              <input id="registerPassword" type="password" placeholder="8자 이상" />
+            </div>
+            <button id="registerButton" class="secondary" type="button">회원가입</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="appPanel" class="hidden">
+        <div class="tab-switch">
+          <div class="chip-row">
+            <button id="workspaceTab" class="chip active" type="button">워크스페이스</button>
+            <button id="adminTab" class="chip hidden" type="button">관리자</button>
+          </div>
+        </div>
+
+        <div id="workspacePage">
+          <div class="layout">
+            <div class="panel tasks">
+              <div class="panel__header">
+                <div>
+                  <p class="eyebrow">주작업</p>
+                  <h2>마감과 집중을 한 화면에서</h2>
+                </div>
+                <button id="openDueModal" class="secondary" type="button">마감일 설정</button>
+              </div>
+              <div class="task-add">
+                <input id="taskTitleInput" type="text" placeholder="주작업 제목" />
+                <input id="taskDueInput" type="text" placeholder="YYYY-MM-DD" readonly />
+                <button id="addTaskButton" class="primary" type="button">추가</button>
+              </div>
+              <p class="helper">버튼을 눌러 연·월·일 GUI로 마감일을 지정하세요.</p>
+              <div id="taskList" class="task-list"></div>
+            </div>
+
+            <div class="panel timers">
+              <div class="panel__header">
+                <div>
+                  <p class="eyebrow">프리셋</p>
+                  <h3>집중 타이머</h3>
+                </div>
+              </div>
+              <div id="durationChips" class="chip-row"></div>
+              <h3>진행 중</h3>
+              <div id="activeTimers" class="active-timers"></div>
+            </div>
+
+            <div class="panel insights">
+              <div class="panel__header">
+                <div>
+                  <p class="eyebrow">데이터</p>
+                  <h3>집중 히트맵</h3>
+                </div>
+                <div class="chip-row view-toggle">
+                  <button class="chip active" data-range="7d" type="button">7일</button>
+                  <button class="chip" data-range="30d" type="button">30일</button>
+                </div>
+              </div>
+              <div class="insights__body">
+                <div class="summary">
+                  <div>
+                    <p class="eyebrow">오늘</p>
+                    <div id="todayMinutes" class="summary__value">0분</div>
+                  </div>
+                  <div>
+                    <p class="eyebrow">범위 합</p>
+                    <div id="rangeTotal" class="summary__value">0분</div>
+                  </div>
+                  <div>
+                    <p class="eyebrow">범위 평균</p>
+                    <div id="rangeAverage" class="summary__value">0분</div>
+                  </div>
+                </div>
+                <div id="heatmap" class="heatmap"></div>
+                <div class="barchart">
+                  <div id="barChart" class="barchart__bars"></div>
+                  <div id="barAxis" class="barchart__axis"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel calendar">
+              <div class="panel__header">
+                <div>
+                  <p class="eyebrow">일정</p>
+                  <h3 id="calendarMonth">이번 달</h3>
+                </div>
+              </div>
+              <div id="calendarGrid" class="calendar__grid"></div>
+              <div id="noDueList" class="no-due"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="adminPage" class="hidden">
+          <div class="panel admin-hero">
+            <div>
+              <p class="eyebrow">관리자 화면</p>
+              <h2>회원 보기 & 활용 현황판</h2>
+              <p class="helper">가입자와 앱 사용 현황을 한 페이지에서 확인합니다.</p>
+            </div>
+            <div class="chip-row">
+              <button id="backToWorkspace" class="ghost" type="button">워크스페이스로</button>
+            </div>
+          </div>
+          <div class="admin-grid">
+            <div class="panel">
+              <div class="panel__header">
+                <h3>활용 현황판</h3>
+              </div>
+              <div id="adminUsageCards" class="stat-cards"></div>
+              <div id="adminActivityBoard" class="activity-board"></div>
+            </div>
+            <div class="panel">
+              <div class="panel__header">
+                <h3>회원 보기</h3>
+              </div>
+              <div id="adminUserTable" class="admin-table"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div id="backdrop" class="backdrop"></div>
+
+    <div id="timerModal" class="modal hidden" role="dialog" aria-modal="true">
+      <div class="modal__content">
+        <div class="modal__header">
+          <div>
+            <p id="timerModalTask" class="eyebrow">작업</p>
+            <h3 id="timerModalTitle">타이머 설정</h3>
+          </div>
+          <button id="closeTimerModal" class="ghost" type="button">닫기</button>
+        </div>
+        <div class="modal__body">
+            <div id="timerConfig">
+              <div class="field">
+                <label>표시 방식</label>
+                <div id="timerModeToggle" class="chip-row">
+                  <button class="chip active" data-mode="digital" type="button">디지털</button>
+                  <button class="chip" data-mode="analog" type="button">아날로그</button>
+                </div>
+              </div>
+              <div class="field-inline">
+                <label class="sr-only" for="durationInput">분</label>
+                <input id="durationInput" type="number" value="25" min="0" />
+                <label class="sr-only" for="secondsInput">초</label>
+                <input id="secondsInput" type="number" value="0" min="0" max="59" />
+              </div>
+              <div class="field">
+                <label>디지털 테마</label>
+                <div id="digitalThemes" class="chip-row"></div>
+              </div>
+              <div class="field">
+                <label>아날로그 테마</label>
+                <div id="analogThemes" class="chip-row"></div>
+              </div>
+              <button id="startTimerConfirm" class="primary" type="button">타이머 시작</button>
+            </div>
+          <div id="timerRunning" class="hidden">
+            <div id="timerVisual" class="timer-visual" data-mode="digital" data-digital-theme="d1" data-analog-theme="a1">
+              <div id="digitalDisplay" class="digital-display">00:00.00</div>
+              <div class="analog-display">
+                <div class="analog-face">
+                  <div id="analogProgress" class="analog-progress"></div>
+                  <div id="analogMin" class="analog-hand analog-hand--min"></div>
+                  <div id="analogSec" class="analog-hand analog-hand--sec"></div>
+                  <div class="analog-center"></div>
+                </div>
+              </div>
+            </div>
+            <div class="timer-controls">
+              <button id="pauseTimer" class="secondary" type="button">일시정지</button>
+              <button id="resumeTimer" class="primary" type="button">재개</button>
+              <button id="finishTimer" class="ghost" type="button">완료 처리</button>
+            </div>
+            <div id="timerMeta" class="helper"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="dueModal" class="modal hidden" role="dialog" aria-modal="true">
+      <div class="modal__content">
+        <div class="modal__header">
+          <div>
+            <p class="eyebrow">마감일 설정</p>
+            <h3>연/월/일 지정</h3>
+          </div>
+          <button id="closeDueModal" class="ghost" type="button">닫기</button>
+        </div>
+        <div class="modal__body">
+          <div class="deadline-grid">
+            <div class="field">
+              <label for="dueYear">연도</label>
+              <select id="dueYear"></select>
+            </div>
+            <div class="field">
+              <label for="dueMonth">월</label>
+              <select id="dueMonth"></select>
+            </div>
+            <div class="field">
+              <label for="dueDay">일</label>
+              <select id="dueDay"></select>
+            </div>
+          </div>
+          <div class="chip-row">
+            <button id="dueToday" class="chip" type="button">오늘</button>
+            <button id="dueNextWeek" class="chip" type="button">+7일</button>
+            <button id="dueClear" class="chip ghost" type="button">마감 없음</button>
+          </div>
+          <div class="deadline-actions">
+            <p class="helper">선택한 날짜가 주작업 입력에 적용됩니다.</p>
+            <button id="applyDueDate" class="primary" type="button">적용</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
